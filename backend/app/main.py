@@ -11,6 +11,8 @@ from .seed import init_db
 
 logging.basicConfig(level=logging.INFO)
 settings = get_settings()
+# getattr keeps this file compatible with older config.py versions.
+CORS_ORIGIN_REGEX = getattr(settings, "cors_origin_regex", None)
 
 
 @asynccontextmanager
@@ -29,6 +31,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
+    allow_origin_regex=CORS_ORIGIN_REGEX,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,11 +42,13 @@ for r in (workspaces.router, forms.router, results.router, public.router, ai.rou
     app.include_router(r)
 
 
-@app.get("/api/health", tags=["meta"])
+# GET + HEAD: uptime monitors (e.g. UptimeRobot) ping with HEAD by default.
+@app.api_route("/api/health", methods=["GET", "HEAD"], tags=["meta"])
 def health():
-    return {"status": "ok"}
+    # Echo the effective CORS config so a misconfigured deploy is easy to spot.
+    return {"status": "ok", "cors_origins": settings.cors_origins, "cors_origin_regex": CORS_ORIGIN_REGEX}
 
 
-@app.get("/", include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 def root():
     return {"name": "Formwise API", "docs": "/docs"}
