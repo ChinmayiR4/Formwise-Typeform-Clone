@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens: "Studio"
+   A quiet neutral base with one confident cobalt accent. Token *names* are
+   kept stable, so components never hard-code colours.
+   ------------------------------------------------------------------ */
+:root {
+  --font-inter: "Inter Variable", "Inter";
+  --font-serif-family: "Instrument Serif";
+  --cream: #f7f7f5; /* app background */
+  --cream-2: #efeeeb; /* hover / pressed */
+  --surface: #ffffff;
+  --ink: #111318; /* primary text & primary buttons */
+  --ink-2: #3a3f4b;
+  --muted: #6b7080;
+  --line: #e8e7e3;
+  --line-2: #d7d6d1;
+  --violet: #2f54eb; /* accent: cobalt */
+  --violet-hover: #2444cc;
+  --violet-soft: #e6ecfe;
+  --violet-tint: #f3f6ff;
+  --success: #12805c;
+  --danger: #d1293d;
+  --danger-soft: #fdecee;
+  --warning: #b25e09;
+  --orbit-planet: var(--surface);
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-2: var(--cream-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-violet: var(--violet);
+  --color-violet-hover: var(--violet-hover);
+  --color-violet-soft: var(--violet-soft);
+  --color-violet-tint: var(--violet-tint);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-serif-family), Georgia, serif;
+  --shadow-card: 0 1px 2px rgba(17, 19, 24, 0.04), 0 1px 1px rgba(17, 19, 24, 0.03);
+  --shadow-pop: 0 16px 40px -12px rgba(17, 19, 24, 0.22), 0 2px 6px rgba(17, 19, 24, 0.06);
+}
+
+html,
+body {
+  background-color: var(--cream);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a, open digits */
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+::selection {
+  background: var(--violet-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* Section labels: small, semibold, quiet. */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Display headline: the one expressive typographic moment. */
+.display {
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Fine dot grid (canvas surround, like a design tool). */
+.dot-grid {
+  background-image: radial-gradient(rgba(17, 19, 24, 0.09) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 5px);
+}
+
+.callout {
+  border: 1px solid var(--line-2);
+}
+
+@keyframes live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(18, 128, 92, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(18, 128, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(18, 128, 92, 0); }
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--success);
+  animation: live-pulse 2s infinite;
+}
+
+/* ---------------- Respondent (runner) theme ---------------- */
+.tf-runner {
+  --tf-bg: #ffffff;
+  --tf-question: #111318;
+  --tf-answer: #2f54eb;
+  --tf-button: #2f54eb;
+  --tf-button-text: #ffffff;
+  --orbit-planet: var(--tf-bg);
+  background: var(--tf-bg);
+  color: var(--tf-question);
+}
+
+.tf-answer-tint {
+  background: color-mix(in srgb, var(--tf-answer) 10%, transparent);
+}
+.tf-answer-tint:hover {
+  background: color-mix(in srgb, var(--tf-answer) 20%, transparent);
+}
+.tf-answer-border {
+  border-color: color-mix(in srgb, var(--tf-answer) 60%, transparent);
+}
+
+.tf-input {
+  color: var(--tf-answer);
+  border-bottom: 1px solid color-mix(in srgb, var(--tf-answer) 30%, transparent);
+  caret-color: var(--tf-answer);
+}
+.tf-input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--tf-answer);
+}
+.tf-input::placeholder {
+  color: color-mix(in srgb, var(--tf-answer) 35%, transparent);
+}
+
+.tf-btn {
+  background: var(--tf-button);
+  color: var(--tf-button-text);
+}
+.tf-btn:hover {
+  filter: brightness(1.08);
+}
+
+@keyframes tf-blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.25; }
+}
+.tf-blink {
+  animation: tf-blink 0.45s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--cream-2) 0px, var(--surface) 120px, var(--cream-2) 240px);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 6px;
+}

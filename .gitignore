@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+backend/*.db
+backend/*.db-*
+.pytest_cache/
+
+# Node / Next
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts
+frontend/.env*.local
+
+.env
+.DS_Store
+*.tsbuildinfo
