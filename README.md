@@ -2,6 +2,16 @@
 
 A full-stack clone of the Typeform experience: build forms in a drag-and-drop builder with a live preview, publish them to a shareable link, collect answers through the one-question-at-a-time conversational flow, and analyse results.
 
+## Live demo
+
+| | |
+|---|---|
+| **App** | https://formwise.chinmayirajani.workers.dev |
+| **Sample public form** | https://formwise.chinmayirajani.workers.dev/to/brewbean |
+| **API** | https://formwise-d1h4.onrender.com (interactive docs at [`/docs`](https://formwise-d1h4.onrender.com/docs)) |
+
+> The API runs on Render's free tier, so the first request after it has been idle can take 30–60 seconds to wake it up. The app shows a "Waking up the server…" notice while it waits.
+
 The layout and interaction patterns follow Typeform closely. The visual design ("Studio") is original: a quiet neutral base with one cobalt accent, Inter for the UI and Instrument Serif for headlines, plus a few small line-art details computed from equations.
 
 | | |
@@ -10,7 +20,7 @@ The layout and interaction patterns follow Typeform closely. The visual design (
 | **Backend** | Python 3.12 · FastAPI · SQLAlchemy 2 · Pydantic v2 |
 | **Database** | SQLite |
 | **AI** | Hugging Face Inference router (OpenAI-compatible chat completions), with an offline fallback |
-| **Hosting** | Frontend on Cloudflare Pages · Backend on Render (see [DEPLOYMENT.md](DEPLOYMENT.md)) |
+| **Hosting** | Frontend on Cloudflare Workers (static assets) · Backend on Render (see [DEPLOYMENT.md](DEPLOYMENT.md)) |
 
 | Builder | Respondent |
 |---|---|
@@ -97,11 +107,11 @@ Open http://localhost:3000. You land in the workspace with seeded forms:
 ## Architecture
 
 ```
-┌──────────────────────── Cloudflare Pages (static) ─────────────────────────┐
+┌─────────────────────── Cloudflare Workers (static) ────────────────────────┐
 │ Next.js static export                                                     │
 │  /workspace        forms list, workspaces, create (scratch / AI)          │
 │  /form?id=&tab=    builder: Create · Connect · Share · Results            │
-│  /to/<slug>        public respondent runner  (_redirects: /to/* → /to)    │
+│  /to/<slug>        public respondent runner  (worker rewrites /to/* → /to)│
 └───────────────┬───────────────────────────────────────────────────────────┘
                 │ fetch (JSON, CORS)       NEXT_PUBLIC_API_URL
 ┌───────────────▼──────────────────────── Render (FastAPI) ─────────────────┐
@@ -113,7 +123,7 @@ Open http://localhost:3000. You land in the workspace with seeded forms:
 ```
 
 **Key decisions**
-- **Static frontend.** Every page is a client component that talks to the API, so the frontend builds to plain files (`out/`) that Cloudflare Pages serves from its edge for free. Public links `/to/<slug>` are served by one page via a rewrite in `public/_redirects`.
+- **Static frontend.** Every page is a client component that talks to the API, so the frontend builds to plain files (`out/`) that Cloudflare Workers Static Assets serves from its edge for free (`frontend/wrangler.jsonc`). Public links `/to/<slug>` are served by one page: a 10-line Worker (`frontend/worker/index.js`) rewrites them to `/to`. `public/_redirects` does the same on Cloudflare Pages.
 - **Local-first builder.** The builder edits questions in memory and autosaves with one `PUT /api/forms/{id}/questions` call (debounced 700 ms; saves are serialised so a burst of edits never races). Question, choice and rule ids are generated on the client and persisted as-is, so nothing needs remapping after a save.
 - **Stable ids keep history intact.** Answers store choice **ids**, not labels, so renaming an option doesn't corrupt stats. Editing a question keeps its id, so existing answers stay attached.
 - **One logic algorithm, two runtimes.** `services/logic.py` and `src/lib/logic.ts` mirror each other. The client uses it for instant navigation; the server re-walks the path on submit, drops answers to skipped questions, and enforces `required` only on visited ones. Jumps may only go *forward*, which rules out loops (validated on save).
